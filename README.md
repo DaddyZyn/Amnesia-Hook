@@ -9,7 +9,7 @@ C++20 · Windows x64 · Beta
 </div>
 
 ---
-
+**Crashes Sometimes will be fixed in the future**
 ## features
 
 **Inline Hooking**
