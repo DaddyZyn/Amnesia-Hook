@@ -1,301 +1,174 @@
 <div align="center">
 
-  <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=500&size=32&pause=1000&color=FFFFFF&center=true&vCenter=true&width=500&lines=amnesia_hook;x64+stealth+hooking;directx11+overlay+base" alt="Typing SVG" />
+# AMNESIA HOOK
+
+**x64 stealth hooking library + DirectX 11 overlay base**
+
+C++20 · Windows x64 · Beta
 
 </div>
 
 ---
 
-<div align="center">
+## features
 
-  <img src="https://img.shields.io/badge/Language-C%2B%2B20-blue?style=for-the-badge&color=0D1117" alt="C++20">
+**Inline Hooking**
+Custom trampoline allocator keeps all jumps within 2GB bounds. Handles RIP-relative instructions (LEA, CALL, Jcc) and expands 8-bit Jcc to 32-bit when needed.
 
-  <img src="https://img.shields.io/badge/Platform-Windows_x64-blue?style=for-the-badge&color=0D1117" alt="Windows x64">
+**VEH Hooking**
+Hardware breakpoints via DR0-DR3. Atomic spinlocks + TLS prevent deadlocks. Single instruction resolution without thread blocking.
 
-  <img src="https://img.shields.io/badge/Status-Beta-red?style=for-the-badge&color=0D1117" alt="Beta">
+**DirectX 11**
+Dummy swapchain trick resolves `IDXGISwapChain::Present` at VMT index 8. Clean ImGui context setup without game crashes.
 
-</div>
+**Thread Safety**
+All other threads suspended during inline patch writes. No mid-instruction corruption.
 
-### /// system_status: beta
+---
 
-sup. **Amnesia** is a stealth-focused, production-ready x64 hooking library and DirectX 11 overlay base built for game reverse engineering and internal modifications.
+## api reference
 
-> **⚠️ Note:** This is currently in active development. While the core engine works flawlessly in standalone tests and isolated environments, it hasn't been heavily battle-tested in the wild against modern anti-cheats just yet. Expect updates, optimizations, and heavy improvements in the near future.
-
-### // core features
-
-* `Advanced Inline Hooking`: Custom memory allocator ensures trampolines are built within a 2GB bounds. Fully calculates and rewrites **RIP-relative instructions** (LEA, CALL, Jcc) into absolute 32-bit/64-bit jumps so your target process doesn't crash.
-
-* `Lock-Free VEH Hooking`: Hardware breakpoint (Dr0-Dr3) execution interception. Uses atomic spinlocks and Thread Local Storage (TLS) to handle single-stepping trap flags without deadlocking game threads.
-
-* `DirectX 11 VMT Hooking`: Dynamically creates a temporary swapchain to steal the `IDXGISwapChain::Present` (Index 8) pointer. Cleanly sets up an ImGui rendering context without crashing the game engine.
-
-* `Thread-Safe`: Automatically suspends and resumes other threads during inline patching to prevent mid-instruction execution crashes.
-
-### // api reference
-
-#### Singleton Access
+### HookManager
 
 ```cpp
 static HookManager& GetInstance()
 ```
 
-Returns the singleton instance of the HookManager. Thread-safe initialization on first call.
+Singleton access. Thread-safe init on first call.
 
 ---
 
-#### Initialization
+### Init
 
 ```cpp
 bool Init()
 ```
 
-Registers the Vectored Exception Handler (VEH) for hardware breakpoint hooks. Must be called before using VEH hooks. Automatically called on DLL_PROCESS_ATTACH if using as a DLL.
-
-**Returns:** `true` if VEH registered successfully or already registered.
+Registers VEH for hardware breakpoint hooks. Auto-called on DLL_PROCESS_ATTACH.
 
 ---
 
-#### Hook Creation
-
-##### Inline Hook (Detour)
+### CreateInlineHook
 
 ```cpp
 bool CreateInlineHook(void* target, void* detour, void** original)
 ```
 
-Creates a standard code detour hook by overwriting the target function's prologue with a jump instruction.
+Patches target prologue with JMP. Builds trampoline preserving original instruction execution.
 
-**Parameters:**
-- `target` - Address of the function to hook
-- `detour` - Address of your replacement function
-- `original` - Output pointer that receives the original function address (trampoline)
-
-**Returns:** `true` if hook created successfully.
-
-**Details:**
-- Resolves jump chains (E9, FF25) to find the actual target
-- Disassembles minimum 14 bytes to ensure space for jump
-- Builds a trampoline that preserves original instruction execution
-- Relocates all RIP-relative instructions (Jcc expansion, CALL relocation, RIP-relative ModRM)
+| param | description |
+|-------|-------------|
+| `target` | function to hook |
+| `detour` | replacement function |
+| `original` | receives trampoline address |
 
 ---
 
-##### VEH Hook (Hardware Breakpoint)
+### CreateVEHHook
 
 ```cpp
 bool CreateVEHHook(void* target, void* detour, void** original)
 ```
 
-Creates a hook using hardware breakpoints via Vectored Exception Handling.
+Sets hardware breakpoint via VEH. Single instruction hook using DR0-DR3.
 
-**Parameters:**
-- `target` - Address of the function to hook
-- `detour` - Address of your replacement function
-- `original` - Output pointer that receives the original function address (trampoline)
-
-**Returns:** `true` if hook created successfully.
-
-**Details:**
-- Uses DR0-DR3 debug registers for execution breakpoint
-- Only hooks single instruction (hardware breakpoint limitation)
-- Trampoline preserves original code for seamless re-execution
-- Lock-free design prevents thread deadlocks
+| param | description |
+|-------|-------------|
+| `target` | function to hook |
+| `detour` | replacement function |
+| `original` | receives trampoline address |
 
 ---
 
-##### Overlay Hook (Generic)
+### CreateOverlayHook
 
 ```cpp
 bool CreateOverlayHook(void* target, void* detour, void** original, HookType type)
 ```
 
-Generic wrapper that creates either an inline or VEH hook based on type parameter.
-
-**Parameters:**
-- `target` - Address of the function to hook
-- `detour` - Address of your replacement function
-- `original` - Output pointer for original function address
-- `type` - `HookType::Inline` or `HookType::VEH`
-
-**Returns:** `true` if hook created successfully.
+Generic wrapper. `type` = `HookType::Inline` or `HookType::VEH`.
 
 ---
 
-#### Hook Management
-
-##### Enable
+### Enable / Disable
 
 ```cpp
 bool Enable(void* target)
-```
-
-Activates a previously created hook.
-
-**Parameters:**
-- `target` - Address that was hooked
-
-**Returns:** `true` if hook enabled successfully.
-
-**Details:**
-- For Inline hooks: patches target with jump to detour, suspends other threads during write
-- For VEH hooks: sets hardware breakpoint in debug register
-
----
-
-##### Disable
-
-```cpp
 bool Disable(void* target)
 ```
 
-Deactivates a hook without removing it.
-
-**Parameters:**
-- `target` - Address that was hooked
-
-**Returns:** `true` if hook disabled successfully.
-
-**Details:**
-- For Inline hooks: restores original bytes, resumes normal execution
-- For VEH hooks: clears hardware breakpoint
+Activates or deactivates a hook. Inline: patches bytes. VEH: sets/clears debug register.
 
 ---
 
-##### Remove Hook
+### RemoveHook
 
 ```cpp
 bool RemoveHook(void* target)
 ```
 
-Completely removes a hook and frees associated resources.
-
-**Parameters:**
-- `target` - Address that was hooked
-
-**Returns:** `true` if hook removed successfully.
+Removes hook and frees trampoline memory.
 
 ---
 
-##### Enable All
+### EnableAll / DisableAll
 
 ```cpp
 bool EnableAll()
-```
-
-Activates all registered hooks simultaneously.
-
-**Returns:** `true` if all hooks enabled.
-
----
-
-##### Disable All
-
-```cpp
 bool DisableAll()
 ```
 
-Deactivates all registered hooks.
-
-**Returns:** `true` if all hooks disabled.
+Bulk activate/deactivate all registered hooks.
 
 ---
 
-##### Check Hook Status
+### IsHooked
 
 ```cpp
 bool IsHooked(void* target)
 ```
 
-Checks if an address has an active hook.
-
-**Parameters:**
-- `target` - Address to check
-
-**Returns:** `true` if hook exists and is enabled.
+Returns `true` if address has active hook.
 
 ---
 
-### // graphics api hooks
+## graphics api
 
-The library provides convenience functions for hooking common graphics API presentation functions.
-
-#### D3D9
-
-```cpp
-bool HookD3D9(void* detour, void** original)
-```
-
-Hooks `IDirect3DDevice9::Present` (VMT index 17) for Direct3D 9 applications.
-
-**Parameters:**
-- `detour` - Your Present replacement function
-- `original` - Output for original Present function pointer
-
-**Returns:** `true` if hook successful.
-
-**Details:**
-- Creates a dummy device to resolve the VMT pointer
-- Hooks the Present function at index 17
-- Release device after resolving address
-
----
-
-#### D3D11
+### HookD3D11
 
 ```cpp
 bool HookD3D11(void* detour, void** original)
 ```
 
-Hooks `IDXGISwapChain::Present` (VMT index 8) for Direct3D 11 applications.
+Hooks `IDXGISwapChain::Present` (VMT index 8). Recommended for D3D11 overlay rendering.
 
-**Parameters:**
-- `detour` - Your Present replacement function
-- `original` - Output for original Present function pointer
+### HookD3D9
 
-**Returns:** `true` if hook successful.
+```cpp
+bool HookD3D9(void* detour, void** original)
+```
 
-**Details:**
-- Creates a temporary swapchain via `D3D11CreateDeviceAndSwapChain`
-- Resolves `pVMT[8]` for the Present function
-- Automatically releases temporary resources after resolving address
-- This is the recommended hook point for D3D11 overlay rendering
+Hooks `IDirect3DDevice9::Present` (VMT index 17).
 
----
-
-#### D3D12
+### HookD3D12
 
 ```cpp
 bool HookD3D12(void* detour, void** original)
 ```
 
-Hooks `IDXGISwapChain::Present` for Direct3D 12 applications.
+Hooks `IDXGISwapChain::Present` for D3D12.
 
-**Parameters:**
-- `detour` - Your Present replacement function
-- `original` - Output for original Present function pointer
-
-**Returns:** `true` if hook successful.
-
----
-
-#### OpenGL
+### HookOpenGL
 
 ```cpp
 bool HookOpenGL(void* detour, void** original)
 ```
 
-Hooks `wglSwapBuffers` for OpenGL applications.
-
-**Parameters:**
-- `detour` - Your SwapBuffers replacement function
-- `original` - Output for original SwapBuffers function pointer
-
-**Returns:** `true` if hook successful.
+Hooks `wglSwapBuffers`.
 
 ---
 
-### // usage example
+## usage
 
 ```cpp
 #include "Amhk.h"
@@ -312,7 +185,7 @@ HRESULThk DetourPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT Flag
         pSwapChain->GetDevice(__uuidof(ID3D11Device), (void**)&pDevice);
         pDevice->GetImmediateContext(&pContext);
 
-        ID3D11Texture2D* pBackBuffer;
+        ID3D11Texture2D* pBackBuffer = nullptr;
         pSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)&pBackBuffer);
         pDevice->CreateRenderTargetView(pBackBuffer, nullptr, &pRTView);
         pBackBuffer->Release();
@@ -340,52 +213,43 @@ HRESULThk DetourPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT Flag
 
 int main() {
     Amhook::HookManager::GetInstance().HookD3D11((void*)DetourPresent, &g_originalPresent);
-    Amhook::HookManager::GetInstance().Enable((void*)/* resolved target */);
 
-    // Game loop...
+    // game loop...
     return 0;
 }
 ```
 
----
+### build
 
-### // quick usage
-
-```cmake
+```sh
 cmake -B build
 cmake --build build
 ```
 
-Link against `Amhook.dll` and include `Amhk.h` in your project.
+Link against `Amhook.dll` and include `Amhk.h`.
 
 ---
 
-### // hook type comparison
+## hook comparison
 
-| Feature | Inline Hook | VEH Hook |
-|---------|-------------|----------|
+| | Inline | VEH |
+|---|--------|-----|
 | **Mechanism** | Code patching | Hardware breakpoints |
-| **Debug Registers** | Not used | DR0-DR3 |
-| **Hook Size** | Minimum 14 bytes | Single instruction |
-| **Thread Safety** | Thread suspension | Atomic spinlock |
+| **Registers** | None | DR0-DR3 |
+| **Hook size** | 14+ bytes | 1 instruction |
 | **Stealth** | Lower | Higher |
-| **Compatibility** | Universal | Windows only |
-| **Performance** | Faster | Slightly slower |
+| **Speed** | Faster | Slower |
 
 ---
 
-### // architecture
+## diagrams
 
-![Architecture Diagram](assets/architecture.svg)
+![Architecture](assets/architecture.svg)
 
----
-
-### // memory layout
-
-![Memory Layout Diagram](assets/memory_layout.svg)
+![Memory Layout](assets/memory_layout.svg)
 
 ---
 
-### // license
+## license
 
-MIT License - Free for personal and commercial use.
+MIT
