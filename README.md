@@ -376,51 +376,13 @@ Link against `Amhook.dll` and include `Amhk.h` in your project.
 
 ### // architecture
 
-```
-┌────────────────────────────────────────────────────────────┐
-│                        HookManager                         │
-├────────────────────────────────────────────────────────────┤
-│  Singleton: GetInstance()                                  │
-│                                                            │
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────┐ │
-│  │Inline Hook  │  │  VEH Hook   │  │  Graphics API Hooks │ │
-│  │             │  │             │  │                     │ │
-│  │- ResolveTarget │- SetHWBP    │  │- HookD3D9()         │ │
-│  │- RelocateInst  │- VEHHandler │  │- HookD3D11()        │ │
-│  │- AllocTramp    │- TLS State  │  │- HookD3D12()        │ │
-│  │- SuspendThread │             │  │- HookOpenGL()       │ │
-│  └─────────────┘  └─────────────┘  └─────────────────────┘ │
-│                                                            │
-│  ┌─────────────────────────────────────────────────────┐   │
-│  │  Thread Safety: std::recursive_mutex                │   │
-│  │  VEH Lock: std::atomic_flag (spinlock)              │   │
-│  │  TLS: thread_local ThreadState                      │   │
-│  └─────────────────────────────────────────────────────┘   │
-└────────────────────────────────────────────────────────────┘
-```
+![Architecture Diagram](assets/architecture.svg)
 
 ---
 
 ### // memory layout
 
-```
-Target Function:
-┌────────────────────┬────────────────────┐
-│   Original Bytes   │                    │
-│   (patchSize)      │   Jump to Detour   │
-│                    │   (14 bytes FF25)  │
-└────────────────────┴────────────────────┘
-         │                    ▲
-         │                    │
-         └────────────────────┘
-              trampoline
-
-Trampoline:
-┌─────────────────────────────────────────────────────────────┐
-│  Relocated Instructions     │  Jump back to Target + 1      │
-│  (with fixed RIP-relative)  │  (14 bytes)                   │
-└─────────────────────────────────────────────────────────────┘
-```
+![Memory Layout Diagram](assets/memory_layout.svg)
 
 ---
 

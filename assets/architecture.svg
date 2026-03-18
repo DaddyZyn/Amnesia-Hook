@@ -1,0 +1,67 @@
+<svg width="900" height="400" viewBox="0 0 900 400" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#1c1c1c"/>
+      <stop offset="100%" stop-color="#252525"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="130%">
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#000" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+
+  <rect width="900" height="400" rx="8" fill="url(#bg)"/>
+
+  <text x="450" y="40" font-family="Segoe UI, sans-serif" font-size="24" fill="#ffffff" text-anchor="middle" font-weight="600" letter-spacing="2">HOOKMANAGER</text>
+  <line x1="300" y1="55" x2="600" y2="55" stroke="#404040" stroke-width="1"/>
+
+  <circle cx="450" cy="95" r="16" fill="#2d2d2d" stroke="#ffffff" stroke-width="2"/>
+  <text x="450" y="99" font-family="Segoe UI, sans-serif" font-size="10" fill="#ffffff" text-anchor="middle">◆</text>
+
+  <line x1="450" y1="111" x2="450" y2="130" stroke="#606060" stroke-width="1.5"/>
+  <circle cx="450" cy="130" r="3" fill="#ffffff"/>
+
+  <line x1="450" y1="133" x2="250" y2="155" stroke="#606060" stroke-width="1"/>
+  <line x1="450" y1="133" x2="450" y2="155" stroke="#606060" stroke-width="1"/>
+  <line x1="450" y1="133" x2="650" y2="155" stroke="#606060" stroke-width="1"/>
+
+  <circle cx="250" cy="155" r="2" fill="#ffffff"/>
+  <circle cx="450" cy="155" r="2" fill="#ffffff"/>
+  <circle cx="650" cy="155" r="2" fill="#ffffff"/>
+
+  <line x1="250" y1="157" x2="250" y2="175" stroke="#ffffff" stroke-width="1.5"/>
+  <line x1="450" y1="157" x2="450" y2="175" stroke="#ffffff" stroke-width="1.5"/>
+  <line x1="650" y1="157" x2="650" y2="175" stroke="#ffffff" stroke-width="1.5"/>
+
+  <rect x="120" y="175" width="260" height="150" rx="4" fill="#2d2d2d" filter="url(#shadow)"/>
+  <rect x="120" y="175" width="260" height="3" fill="#ffffff"/>
+  <text x="250" y="205" font-family="Segoe UI, sans-serif" font-size="16" fill="#ffffff" text-anchor="middle" font-weight="500">Inline Hook</text>
+  <text x="250" y="225" font-family="Segoe UI, sans-serif" font-size="11" fill="#808080" text-anchor="middle">Code Patching</text>
+  <line x1="140" y1="240" x2="360" y2="240" stroke="#404040" stroke-width="1"/>
+  <text x="140" y="262" font-family="Consolas, monospace" font-size="11" fill="#c0c0c0">ResolveTarget</text>
+  <text x="140" y="282" font-family="Consolas, monospace" font-size="11" fill="#c0c0c0">RelocateInst</text>
+  <text x="140" y="302" font-family="Consolas, monospace" font-size="11" fill="#c0c0c0">AllocTrampoline</text>
+  <text x="140" y="322" font-family="Consolas, monospace" font-size="11" fill="#c0c0c0">SuspendThreads</text>
+
+  <rect x="320" y="175" width="260" height="150" rx="4" fill="#2d2d2d" filter="url(#shadow)"/>
+  <rect x="320" y="175" width="260" height="3" fill="#c0c0c0"/>
+  <text x="450" y="205" font-family="Segoe UI, sans-serif" font-size="16" fill="#ffffff" text-anchor="middle" font-weight="500">VEH Hook</text>
+  <text x="450" y="225" font-family="Segoe UI, sans-serif" font-size="11" fill="#808080" text-anchor="middle">Hardware Breakpoints</text>
+  <line x1="340" y1="240" x2="560" y2="240" stroke="#404040" stroke-width="1"/>
+  <text x="340" y="262" font-family="Consolas, monospace" font-size="11" fill="#c0c0c0">SetHardwareBP</text>
+  <text x="340" y="282" font-family="Consolas, monospace" font-size="11" fill="#c0c0c0">VEHHandler</text>
+  <text x="340" y="302" font-family="Consolas, monospace" font-size="11" fill="#c0c0c0">TLS ThreadState</text>
+  <text x="340" y="322" font-family="Consolas, monospace" font-size="11" fill="#c0c0c0">AtomicSpinlock</text>
+
+  <rect x="520" y="175" width="260" height="150" rx="4" fill="#2d2d2d" filter="url(#shadow)"/>
+  <rect x="520" y="175" width="260" height="3" fill="#808080"/>
+  <text x="650" y="205" font-family="Segoe UI, sans-serif" font-size="16" fill="#ffffff" text-anchor="middle" font-weight="500">Graphics API</text>
+  <text x="650" y="225" font-family="Segoe UI, sans-serif" font-size="11" fill="#808080" text-anchor="middle">D3D / OpenGL</text>
+  <line x1="540" y1="240" x2="760" y2="240" stroke="#404040" stroke-width="1"/>
+  <text x="540" y="262" font-family="Consolas, monospace" font-size="11" fill="#c0c0c0">HookD3D9</text>
+  <text x="540" y="282" font-family="Consolas, monospace" font-size="11" fill="#c0c0c0">HookD3D11</text>
+  <text x="540" y="302" font-family="Consolas, monospace" font-size="11" fill="#c0c0c0">HookD3D12</text>
+  <text x="540" y="322" font-family="Consolas, monospace" font-size="11" fill="#c0c0c0">HookOpenGL</text>
+
+  <line x1="100" y1="350" x2="800" y2="350" stroke="#404040" stroke-width="1"/>
+  <text x="450" y="375" font-family="Segoe UI, sans-serif" font-size="11" fill="#606060" text-anchor="middle">recursive_mutex  ·  atomic_flag  ·  thread_local</text>
+</svg>
