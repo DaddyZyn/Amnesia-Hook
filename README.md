@@ -377,26 +377,26 @@ Link against `Amhook.dll` and include `Amhk.h` in your project.
 ### // architecture
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                        HookManager                          │
-├─────────────────────────────────────────────────────────────┤
-│  Singleton: GetInstance()                                   │
-│                                                             │
+┌────────────────────────────────────────────────────────────┐
+│                        HookManager                         │
+├────────────────────────────────────────────────────────────┤
+│  Singleton: GetInstance()                                  │
+│                                                            │
 │  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────┐ │
 │  │Inline Hook  │  │  VEH Hook   │  │  Graphics API Hooks │ │
 │  │             │  │             │  │                     │ │
-│  │- ResolveTarget │- SetHWBP   │  │- HookD3D9()        │ │
-│  │- RelocateInst │- VEHHandler │  │- HookD3D11()       │ │
-│  │- AllocTramp   │- TLS State  │  │- HookD3D12()       │ │
-│  │- SuspendThread│             │  │- HookOpenGL()      │ │
+│  │- ResolveTarget │- SetHWBP    │  │- HookD3D9()         │ │
+│  │- RelocateInst  │- VEHHandler │  │- HookD3D11()        │ │
+│  │- AllocTramp    │- TLS State  │  │- HookD3D12()        │ │
+│  │- SuspendThread │             │  │- HookOpenGL()       │ │
 │  └─────────────┘  └─────────────┘  └─────────────────────┘ │
-│                                                             │
+│                                                            │
 │  ┌─────────────────────────────────────────────────────┐   │
-│  │  Thread Safety: std::recursive_mutex                 │   │
+│  │  Thread Safety: std::recursive_mutex                │   │
 │  │  VEH Lock: std::atomic_flag (spinlock)              │   │
 │  │  TLS: thread_local ThreadState                      │   │
 │  └─────────────────────────────────────────────────────┘   │
-└─────────────────────────────────────────────────────────────┘
+└────────────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -417,8 +417,8 @@ Target Function:
 
 Trampoline:
 ┌─────────────────────────────────────────────────────────────┐
-│  Relocated Instructions    │  Jump back to Target + 14   │
-│  (with fixed RIP-relative)  │  (14 bytes)                 │
+│  Relocated Instructions     │  Jump back to Target + 1      │
+│  (with fixed RIP-relative)  │  (14 bytes)                   │
 └─────────────────────────────────────────────────────────────┘
 ```
 
